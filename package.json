@@ -1,0 +1,22 @@
+{
+  "name": "expressionify",
+  "description": "parse expressions to rpn and evaluate them",
+  "version": "1.0.0",
+  "author": "2do2go team <dev.2do2go@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/2do2go/expressionify"
+  },
+  "keywords": [
+    "expression", "evaluate"
+  ],
+  "devDependencies" : {
+    "mocha": "1.8.1",
+    "expect.js": "0.2.0"
+  },
+  "scripts": {
+    "test": "mocha test --reporter spec"
+  },
+  "main": "lib/expressionify"
+}
