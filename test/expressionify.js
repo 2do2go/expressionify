@@ -4,7 +4,7 @@ var expect = require('expect.js');
 
 var expressionify = require('../lib/expressionify').expressionify;
 
-// default boolean operand parser
+// boolean operand parser
 var parseBooleanOperand = function(operand) {
 	var value = null;
 	if (operand === 'true' || operand === '1') {
@@ -15,6 +15,55 @@ var parseBooleanOperand = function(operand) {
 	}
 
 	return value;
+};
+
+var parseNumberOperand = function(operand) {
+	return Number(operand);
+};
+
+var arithmeticalOperators = {
+	'+': {
+		execute: function(x, y) {
+			return y !== undefined ? (x + y) : +x;
+		},
+		priority: {
+			binary: 1,
+			unary: 3
+		}
+	},
+	'-': {
+		execute: function(x, y) {
+			return y !== undefined ? (x - y) : -x;
+		},
+		priority: {
+			binary: 1,
+			unary: 3
+		}
+	},
+	'*': {
+		execute: function(x, y) {
+			return x * y;
+		},
+		priority: {
+			binary: 2
+		}
+	},
+	'/': {
+		execute: function(x, y) {
+			return x / y;
+		},
+		priority: {
+			binary: 2
+		}
+	},
+	'%': {
+		execute: function(x, y) {
+			return x % y;
+		},
+		priority: {
+			binary: 2
+		}
+	}
 };
 
 describe('expressionify', function() {
@@ -102,6 +151,43 @@ describe('expressionify', function() {
 		);
 	});
 
+	[{
+		expression: '2',
+		result: 2
+	}, {
+		expression: '2 + 2',
+		result: 4
+	}, {
+		expression: '2*3 + 4',
+		result: 10
+	}, {
+		expression: '18 / 3 * 2',
+		result: 12
+	}, {
+		expression: '18 / (3 * 2)',
+		result: 3
+	}, {
+		expression: '-(2+2)',
+		result: -4
+	}, {
+		expression: '5 * -3',
+		result: -15
+	}, {
+		expression: '5 % 3',
+		result: 2
+	}].forEach(function(test) {
+		it('should return ' + test.result + ' for ' + test.expression,
+			function() {
+				var evalExpression = expressionify(test.expression, {
+					operators: arithmeticalOperators,
+					parseOperand: parseNumberOperand
+				});
+
+				expect(evalExpression()).to.be.eql(test.result);
+			}
+		);
+	});
+
 	it('should throw `expression is missing` error',
 		function() {
 			expect(expressionify).to.throwException(function(err) {
@@ -123,6 +209,18 @@ describe('expressionify', function() {
 			expect(expressionify).withArgs('invalid:~').to.throwException(
 				function(err) {
 					expect(err.toString()).to.eql('Error: expression is invalid');
+				}
+			);
+		}
+	);
+
+	it('should throw `parseOperand is missing` error',
+		function() {
+			var evalExpression = expressionify('1');
+
+			expect(evalExpression).to.throwException(
+				function(err) {
+					expect(err.toString()).to.eql('Error: parseOperand is missing');
 				}
 			);
 		}
