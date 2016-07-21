@@ -1,6 +1,8 @@
 
 # expressionify
 
+[![Build Status](https://travis-ci.org/2do2go/expressionify.svg?branch=master)](https://travis-ci.org/2do2go/expressionify)
+
 Simple node.js expression parser and evaluator using shunting-yard and reverse
 polish notation algorithms.
 
