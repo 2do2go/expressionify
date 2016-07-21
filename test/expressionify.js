@@ -152,6 +152,37 @@ describe('expressionify', function() {
 	});
 
 	[{
+		expression: 'x + y',
+		result: 5
+	}, {
+		expression: '-x*-x',
+		result: 4
+	}, {
+		expression: '2*x*x + 4*x - 3',
+		result: 13
+	}, {
+		expression: '7*x - 3*y*x + 3*-x',
+		result: -10
+	}].forEach(function(test) {
+		it('should return ' + test.result + ' for ' + test.expression,
+			function() {
+				var values = {
+					x: 2,
+					y: 3
+				};
+
+				var evalExpression = expressionify(test.expression, {
+					operators: arithmeticalOperators
+				});
+
+				expect(evalExpression(function(operand) {
+					return operand in values ? values[operand] : Number(operand);
+				})).to.be.eql(test.result);
+			}
+		);
+	});
+
+	[{
 		expression: '2',
 		result: 2
 	}, {
