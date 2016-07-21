@@ -21,14 +21,15 @@
     "undef": true,
     "immed": true,
     "unused": true,
-    // allows ECMAScript 6 syntax (generators, etc)
-    "esnext": true,
-    // allow generators without a yield
-    "noyield": true,
-    "globals": {
-        "describe": false,
-        "it": false,
+    // to support processUtils.execScript
+    "evil": true,
+	"globals": {
+		"JSON": false,
+		"describe": false,
+		"it": false,
 		"before": false,
-		"after": false
-    }
+		"after": false,
+		"beforeEach": false,
+		"afterEach": false
+	}
 }

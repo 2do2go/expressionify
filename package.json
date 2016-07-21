@@ -1,6 +1,6 @@
 {
   "name": "expressionify",
-  "description": "parse expressions to rpn and evaluate them",
+  "description": "Simple node.js expression parser and evaluator using shunting-yard and reverse polish notation algorithms",
   "version": "1.0.0",
   "author": "2do2go team <dev.2do2go@gmail.com>",
   "license": "MIT",
@@ -9,14 +9,25 @@
     "url": "https://github.com/2do2go/expressionify"
   },
   "keywords": [
-    "expression", "evaluate"
+    "expression",
+    "parser",
+    "evaluator",
+    "shunting-yard",
+    "reverse polish notation",
+    "rpn"
   ],
+  "bugs": {
+    "url": "https://github.com/2do2go/expressionify/issues"
+  },
+  "homepage": "https://github.com/2do2go/expressionify",
   "devDependencies" : {
-    "mocha": "1.8.1",
-    "expect.js": "0.3.0"
+    "mocha": "2.4.5",
+    "expect.js": "0.3.1",
+    "jshint": "2.4.4"
   },
   "scripts": {
-    "test": "mocha test --reporter spec"
+    "test": "mocha --bail --reporter spec --timeout 10000",
+    "lint": "jshint ./"
   },
-  "main": "lib/expressionify"
+  "main": "lib/expressionify.js"
 }
