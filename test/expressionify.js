@@ -1,7 +1,7 @@
 'use strict';
 
 var expect = require('expect.js');
-var expressionify = require('../lib/expressionify').expressionify;
+var expressionify = require('../lib/expressionify');
 
 
 var booleanOperators = {
@@ -69,6 +69,15 @@ var parseNumberOperand = function(operand) {
 
 
 describe('expressionify', function() {
+
+	it('module exports function', function() {
+		expect(expressionify).a(Function);
+	});
+
+	it('modle exports Expression class', function() {
+		expect(expressionify.Expression).a(Function);
+	});
+
 	// test boolean expressions
 	[{
 		expression: '1 | 1 & 0',
@@ -248,41 +257,31 @@ describe('expressionify', function() {
 
 	it('should throw `expression is missing` error cause expresion is `undefined`',
 		function() {
-			expect(expressionify).withArgs(undefined, {
+			expect(expressionify(undefined, {
 				operators: arithmeticalOperators
-			}).to.throwException(function(err) {
-				expect(err.toString()).to.equal('Error: expression is missing');
+			})).to.throwException(function(err) {
+				expect(err.message).to.equal('expression is missing');
 			});
 		}
 	);
 
 	it('should throw `expression is missing` error cause expression is empty',
 		function() {
-			expect(expressionify).withArgs('', {
+			expect(expressionify('', {
 				operators: arithmeticalOperators
-			}).to.throwException(function(err) {
-				expect(err.toString()).to.equal('Error: expression is missing');
+			})).to.throwException(function(err) {
+				expect(err.message).to.equal('expression is missing');
 			});
 		}
 	);
 
 	it('should throw `expression is invalid` error',
 		function() {
-			expect(expressionify).withArgs('invalid:~', {
+			expect(expressionify('invalid:~', {
 				operators: arithmeticalOperators
-			}).to.throwException(
+			})).to.throwException(
 				function(err) {
-					expect(err.toString()).to.equal('Error: expression is invalid');
-				}
-			);
-		}
-	);
-
-	it('should throw `params is missing` error',
-		function() {
-			expect(expressionify).to.throwException(
-				function(err) {
-					expect(err.toString()).to.equal('Error: params is missing');
+					expect(err.message).to.equal('expression is invalid');
 				}
 			);
 		}
@@ -290,9 +289,9 @@ describe('expressionify', function() {
 
 	it('should throw `params.operators is missing` error',
 		function() {
-			expect(expressionify).withArgs('1', {}).to.throwException(
+			expect(expressionify('1', {})).to.throwException(
 				function(err) {
-					expect(err.toString()).to.equal('Error: params.operators is missing');
+					expect(err.message).to.equal('params.operators is missing');
 				}
 			);
 		}
@@ -306,7 +305,7 @@ describe('expressionify', function() {
 
 			expect(evalExpression).to.throwException(
 				function(err) {
-					expect(err.toString()).to.equal('Error: params.parseOperand is missing');
+					expect(err.message).to.equal('params.parseOperand is missing');
 				}
 			);
 		}
