@@ -1,10 +1,27 @@
 'use strict';
 
 var expect = require('expect.js');
-
 var expressionify = require('../lib/expressionify').expressionify;
 
-// boolean operand parser
+
+var booleanOperators = {
+	'|': {
+		execute: function(x, y) { return x || y; },
+		priority: 1,
+		type: 'binary'
+	},
+	'&': {
+		execute: function(x, y) { return x && y; },
+		priority: 2,
+		type: 'binary'
+	},
+	'!': {
+		execute: function(x) { return !x; },
+		priority: 3,
+		type: 'unary'
+	}
+};
+
 var parseBooleanOperand = function(operand) {
 	var value = null;
 	if (operand === 'true' || operand === '1') {
@@ -17,56 +34,42 @@ var parseBooleanOperand = function(operand) {
 	return value;
 };
 
+
+var arithmeticalOperators = {
+	'+': {
+		execute: function(x, y) { return x + y; },
+		priority: 1,
+		type: 'binary'
+	},
+	'-': {
+		execute: function(x, y) { return x - y; },
+		priority: 1,
+		type: 'binary'
+	},
+	'*': {
+		execute: function(x, y) { return x * y; },
+		priority: 2,
+		type: 'binary'
+	},
+	'/': {
+		execute: function(x, y) { return x / y; },
+		priority: 2,
+		type: 'binary'
+	},
+	'%': {
+		execute: function(x, y) { return x % y; },
+		priority: 2,
+		type: 'binary'
+	}
+};
+
 var parseNumberOperand = function(operand) {
 	return Number(operand);
 };
 
-var arithmeticalOperators = {
-	'+': {
-		execute: function(x, y) {
-			return y !== undefined ? (x + y) : +x;
-		},
-		priority: {
-			binary: 1,
-			unary: 3
-		}
-	},
-	'-': {
-		execute: function(x, y) {
-			return y !== undefined ? (x - y) : -x;
-		},
-		priority: {
-			binary: 1,
-			unary: 3
-		}
-	},
-	'*': {
-		execute: function(x, y) {
-			return x * y;
-		},
-		priority: {
-			binary: 2
-		}
-	},
-	'/': {
-		execute: function(x, y) {
-			return x / y;
-		},
-		priority: {
-			binary: 2
-		}
-	},
-	'%': {
-		execute: function(x, y) {
-			return x % y;
-		},
-		priority: {
-			binary: 2
-		}
-	}
-};
 
 describe('expressionify', function() {
+	// test boolean expressions
 	[{
 		expression: '1 | 1 & 0',
 		result: true
@@ -106,19 +109,20 @@ describe('expressionify', function() {
 	}, {
 		expression: '!!1',
 		result: true
-	}, {
-		expression: '!!!!1',
-		result: true
 	}].forEach(function(test) {
 		it('should return ' + test.result + ' for ' + test.expression,
 			function() {
-				var evalExpression = expressionify(test.expression);
+				var evalExpression = expressionify(test.expression, {
+					operators: booleanOperators,
+					parseOperand: parseBooleanOperand
+				});
 
-				expect(evalExpression(parseBooleanOperand)).to.be.eql(test.result);
+				expect(evalExpression()).to.be.equal(test.result);
 			}
 		);
 	});
 
+	// test boolean expressions with variables
 	[{
 		expression: 'op1',
 		result: true
@@ -142,26 +146,30 @@ describe('expressionify', function() {
 			function() {
 				var operands = ['op1', 'op2', 'op3'];
 
-				var evalExpression = expressionify(test.expression);
+				var evalExpression = expressionify(test.expression, {
+					operators: booleanOperators,
+					parseOperand: function(operand) {
+						return operands.indexOf(operand) !== -1;
+					}
+				});
 
-				expect(evalExpression(function(operand) {
-					return operands.indexOf(operand) !== -1;
-				})).to.be.eql(test.result);
+				expect(evalExpression()).to.be.equal(test.result);
 			}
 		);
 	});
 
+	// test arithmetical expressions with variables
 	[{
 		expression: 'x + y',
 		result: 5
 	}, {
-		expression: '-x*-x',
+		expression: 'x*x',
 		result: 4
 	}, {
 		expression: '2*x*x + 4*x - 3',
 		result: 13
 	}, {
-		expression: '7*x - 3*y*x + 3*-x',
+		expression: 'x*(4 - 3*y)',
 		result: -10
 	}].forEach(function(test) {
 		it('should return ' + test.result + ' for ' + test.expression,
@@ -172,16 +180,18 @@ describe('expressionify', function() {
 				};
 
 				var evalExpression = expressionify(test.expression, {
-					operators: arithmeticalOperators
+					operators: arithmeticalOperators,
+					parseOperand: function(operand) {
+						return operand in values ? values[operand] : Number(operand);
+					}
 				});
 
-				expect(evalExpression(function(operand) {
-					return operand in values ? values[operand] : Number(operand);
-				})).to.be.eql(test.result);
+				expect(evalExpression()).to.be.equal(test.result);
 			}
 		);
 	});
 
+	// test arithmetical expressions
 	[{
 		expression: '2',
 		result: 2
@@ -198,14 +208,11 @@ describe('expressionify', function() {
 		expression: '18 / (3 * 2)',
 		result: 3
 	}, {
-		expression: '-(2+2)',
-		result: -4
-	}, {
-		expression: '5 * -3',
-		result: -15
-	}, {
 		expression: '5 % 3',
 		result: 2
+	}, {
+		expression: '1 / 0',
+		result: Infinity
 	}].forEach(function(test) {
 		it('should return ' + test.result + ' for ' + test.expression,
 			function() {
@@ -214,44 +221,92 @@ describe('expressionify', function() {
 					parseOperand: parseNumberOperand
 				});
 
-				expect(evalExpression()).to.be.eql(test.result);
+				expect(evalExpression()).to.be.equal(test.result);
 			}
 		);
 	});
 
-	it('should throw `expression is missing` error',
+	[{
+		expression: '10 + not_a_number',
+		result: 'NaN'
+	}, {
+		expression: 'Infinity / Infinity',
+		result: 'NaN'
+	}].forEach(function(test) {
+		it('should return ' + test.result + ' for ' + test.expression,
+			function() {
+				var evalExpression = expressionify(test.expression, {
+					operators: arithmeticalOperators,
+					parseOperand: parseNumberOperand
+				});
+
+				expect(evalExpression().toString()).to.be.equal(test.result);
+			}
+		);
+	});
+
+
+	it('should throw `expression is missing` error cause expresion is `undefined`',
 		function() {
-			expect(expressionify).to.throwException(function(err) {
-				expect(err.toString()).to.eql('Error: expression is missing');
+			expect(expressionify).withArgs(undefined, {
+				operators: arithmeticalOperators
+			}).to.throwException(function(err) {
+				expect(err.toString()).to.equal('Error: expression is missing');
 			});
 		}
 	);
 
-	it('should throw `expression is missing` error',
+	it('should throw `expression is missing` error cause expression is empty',
 		function() {
-			expect(expressionify).withArgs('').to.throwException(function(err) {
-				expect(err.toString()).to.eql('Error: expression is missing');
+			expect(expressionify).withArgs('', {
+				operators: arithmeticalOperators
+			}).to.throwException(function(err) {
+				expect(err.toString()).to.equal('Error: expression is missing');
 			});
 		}
 	);
 
 	it('should throw `expression is invalid` error',
 		function() {
-			expect(expressionify).withArgs('invalid:~').to.throwException(
+			expect(expressionify).withArgs('invalid:~', {
+				operators: arithmeticalOperators
+			}).to.throwException(
 				function(err) {
-					expect(err.toString()).to.eql('Error: expression is invalid');
+					expect(err.toString()).to.equal('Error: expression is invalid');
 				}
 			);
 		}
 	);
 
-	it('should throw `parseOperand is missing` error',
+	it('should throw `params is missing` error',
 		function() {
-			var evalExpression = expressionify('1');
+			expect(expressionify).to.throwException(
+				function(err) {
+					expect(err.toString()).to.equal('Error: params is missing');
+				}
+			);
+		}
+	);
+
+	it('should throw `params.operators is missing` error',
+		function() {
+			expect(expressionify).withArgs('1', {}).to.throwException(
+				function(err) {
+					expect(err.toString()).to.equal('Error: params.operators is missing');
+				}
+			);
+		}
+	);
+
+	it('should throw `params.parseOperand is missing` error',
+		function() {
+			var evalExpression = expressionify('1', {
+				operators: arithmeticalOperators
+			});
 
 			expect(evalExpression).to.throwException(
 				function(err) {
-					expect(err.toString()).to.eql('Error: parseOperand is missing');
+					expect(err.toString()).to.equal('Error: params.parseOperand is missing');
 				}
 			);
 		}
