@@ -74,7 +74,7 @@ describe('expressionify', function() {
 		expect(expressionify).a(Function);
 	});
 
-	it('modle exports Expression class', function() {
+	it('module exports Expression class', function() {
 		expect(expressionify.Expression).a(Function);
 	});
 

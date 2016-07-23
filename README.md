@@ -66,9 +66,9 @@ expressionify exposes function which accepts following parameters:
 
  * `parseOperand` - function that will be used to parse every operand.
 
- * `operandPattern` - regexp pattern to match operands in expression.
+ * `operandPattern` - regexp pattern to match operands in expression. By default `operandPattern` is `'[A-Za-z\d\_]+'`.
 
- * `tokenPattern` - regexp pattern to split expression onto tokens.
+ * `tokenPattern` - regexp pattern to split expression onto tokens. By default `tokenPattern` building from `operandPattern`, operator signs and brackets.
 
 Returns evaluator function which accepts same `expression` and `params`
 arguments, that allows to override parameters specified during evaluator
