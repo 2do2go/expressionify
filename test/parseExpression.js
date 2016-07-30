@@ -12,35 +12,27 @@ var booleanOperators = {
 
 describe('parseExpression', function() {
 
-	it('should throw `expression is missing` error cause expresion is `undefined`',
-		function() {
-			expect(parseExpression).withArgs(
-				undefined,
-				{
-					operators: booleanOperators
-				}
-			).to.throwException(
-				function(err) {
-					expect(err.message).to.equal('expression is missing');
-				}
-			);
-		}
-	);
-
-	it('should throw `expression is missing` error cause expression is empty',
-		function() {
-			expect(parseExpression).withArgs(
-				'',
-				{
-					operators: booleanOperators
-				}
-			).to.throwException(
-				function(err) {
-					expect(err.message).to.equal('expression is missing');
-				}
-			);
-		}
-	);
+	[
+		undefined,
+		'',
+		'   '
+	].forEach(function(expression) {
+		it('should throw `expression is missing` error cause expresion is "' +
+			expression + '"',
+			function() {
+				expect(parseExpression).withArgs(
+					expression,
+					{
+						operators: booleanOperators
+					}
+				).to.throwException(
+					function(err) {
+						expect(err.message).to.equal('expression is missing');
+					}
+				);
+			}
+		);
+	});
 
 	[
 		'1 1',
@@ -67,12 +59,11 @@ describe('parseExpression', function() {
 	});
 
 	[
-		'(a | b',
 		'a | b)',
 		'(a | b) & c)'
 	].forEach(function(expression) {
 		it('should throw `unexpected end of expression` error for "' + expression +
-			'" cause lost bracket',
+			'" cause lost opening bracket',
 			function() {
 				expect(parseExpression).withArgs(
 					expression,
@@ -81,7 +72,32 @@ describe('parseExpression', function() {
 					}
 				).to.throwException(
 					function(err) {
-						expect(err.message).to.match(/^unexpected end of expression: lost/);
+						expect(err.message).to.match(
+							/^unexpected end of expression: lost opening bracket$/
+						);
+					}
+				);
+			}
+		);
+	});
+
+	[
+		'(a | b',
+		'(c & (a | b)'
+	].forEach(function(expression) {
+		it('should throw `unexpected end of expression` error for "' + expression +
+			'" cause lost closing bracket',
+			function() {
+				expect(parseExpression).withArgs(
+					expression,
+					{
+						operators: booleanOperators
+					}
+				).to.throwException(
+					function(err) {
+						expect(err.message).to.match(
+							/^unexpected end of expression: lost closing bracket$/
+						);
 					}
 				);
 			}
@@ -90,7 +106,6 @@ describe('parseExpression', function() {
 
 	[
 		'a |',
-		' ',
 		'!',
 		'('
 	].forEach(function(expression) {

@@ -38,8 +38,10 @@ var booleanOperators = {
 ```
 
 Also you must pass `parseOperand` to evaluate methods. `parseOperand` will be
-used to parse every operand. It must return value compatible with defined
-operators.
+used to get value of every operand. Operand is a sequence of non-whitespace
+characters that is not equals to any operator or bracket.
+
+**Note:** `parseOperand` must return value compatible with defined operators.
 
 For example, see `parseOperand` for boolean expressions:
 
@@ -65,10 +67,6 @@ expressionify exposes function which accepts following parameters:
  * `operators` - hash of operators. **Required**.
 
  * `parseOperand` - function that will be used to parse every operand.
-
- * `operandPattern` - regexp pattern to match operands in expression. By default `operandPattern` is `'[A-Za-z\d\_]+'`.
-
- * `tokenPattern` - regexp pattern to split expression onto tokens. By default `tokenPattern` building from `operandPattern`, operator signs and brackets.
 
 Returns evaluator function which accepts same `expression` and `params`
 arguments, that allows to override parameters specified during evaluator
