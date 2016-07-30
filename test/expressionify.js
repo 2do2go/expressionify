@@ -255,38 +255,6 @@ describe('expressionify', function() {
 	});
 
 
-	it('should throw `expression is missing` error cause expresion is `undefined`',
-		function() {
-			expect(expressionify(undefined, {
-				operators: arithmeticalOperators
-			})).to.throwException(function(err) {
-				expect(err.message).to.equal('expression is missing');
-			});
-		}
-	);
-
-	it('should throw `expression is missing` error cause expression is empty',
-		function() {
-			expect(expressionify('', {
-				operators: arithmeticalOperators
-			})).to.throwException(function(err) {
-				expect(err.message).to.equal('expression is missing');
-			});
-		}
-	);
-
-	it('should throw `expression is invalid` error',
-		function() {
-			expect(expressionify('invalid:~', {
-				operators: arithmeticalOperators
-			})).to.throwException(
-				function(err) {
-					expect(err.message).to.equal('expression is invalid');
-				}
-			);
-		}
-	);
-
 	it('should throw `params.operators is missing` error',
 		function() {
 			expect(expressionify('1', {})).to.throwException(
