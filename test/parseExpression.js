@@ -19,9 +19,11 @@ describe('parseExpression', function() {
 				{
 					operators: booleanOperators
 				}
-			).to.throwException(function(err) {
-				expect(err.message).to.equal('expression is missing');
-			});
+			).to.throwException(
+				function(err) {
+					expect(err.message).to.equal('expression is missing');
+				}
+			);
 		}
 	);
 
@@ -32,9 +34,11 @@ describe('parseExpression', function() {
 				{
 					operators: booleanOperators
 				}
-			).to.throwException(function(err) {
-				expect(err.message).to.equal('expression is missing');
-			});
+			).to.throwException(
+				function(err) {
+					expect(err.message).to.equal('expression is missing');
+				}
+			);
 		}
 	);
 
@@ -53,9 +57,11 @@ describe('parseExpression', function() {
 					{
 						operators: booleanOperators
 					}
-				).to.throwException(function(err) {
-					expect(err.message).to.match(/^unexpected token/);
-				});
+				).to.throwException(
+					function(err) {
+						expect(err.message).to.match(/^unexpected token/);
+					}
+				);
 			}
 		);
 	});
@@ -73,9 +79,11 @@ describe('parseExpression', function() {
 					{
 						operators: booleanOperators
 					}
-				).to.throwException(function(err) {
-					expect(err.message).to.match(/^unexpected end of expression: lost/);
-				});
+				).to.throwException(
+					function(err) {
+						expect(err.message).to.match(/^unexpected end of expression: lost/);
+					}
+				);
 			}
 		);
 	});
@@ -86,16 +94,19 @@ describe('parseExpression', function() {
 		'!',
 		'('
 	].forEach(function(expression) {
-		it('should throw `unexpected end of expression` error for "' + expression + '"',
+		it('should throw `unexpected end of expression` error for "' + expression +
+			'"',
 			function() {
 				expect(parseExpression).withArgs(
 					expression,
 					{
 						operators: booleanOperators
 					}
-				).to.throwException(function(err) {
-					expect(err.message).to.match(/^unexpected end of expression$/);
-				});
+				).to.throwException(
+					function(err) {
+						expect(err.message).to.match(/^unexpected end of expression$/);
+					}
+				);
 			}
 		);
 	});
