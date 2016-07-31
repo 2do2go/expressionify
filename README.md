@@ -78,7 +78,6 @@ creation.
 For example, evaluating simple logic expressions using once built evaluator:
 
 ```js
-
 var evaluateExpression = expressionify({
 	operators: booleanOperators,
 	parseOperand: Number
@@ -93,7 +92,6 @@ result = evaluateExpression('(1 | 0) & !1');
 
 console.log(result);
 // false
-
 ```
 
 Another example is evaluating expression that contains variables:
@@ -119,3 +117,5 @@ values.z = true;
 console.log(evaluateExpression());
 // false
 ```
+
+For more examples with boolean, arithmetical and set expressions see [./test directory](./test).
