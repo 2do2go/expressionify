@@ -38,8 +38,10 @@ var booleanOperators = {
 ```
 
 Also you must pass `parseOperand` to evaluate methods. `parseOperand` will be
-used to parse every operand. It must return value compatible with defined
-operators.
+used to get value of every operand. Operand is a sequence of non-whitespace
+characters that is not equals to any operator or bracket.
+
+**Note:** `parseOperand` must return value compatible with defined operators.
 
 For example, see `parseOperand` for boolean expressions:
 
@@ -66,10 +68,6 @@ expressionify exposes function which accepts following parameters:
 
  * `parseOperand` - function that will be used to parse every operand.
 
- * `operandPattern` - regexp pattern to match operands in expression.
-
- * `tokenPattern` - regexp pattern to split expression onto tokens.
-
 Returns evaluator function which accepts same `expression` and `params`
 arguments, that allows to override parameters specified during evaluator
 creation.
@@ -80,7 +78,6 @@ creation.
 For example, evaluating simple logic expressions using once built evaluator:
 
 ```js
-
 var evaluateExpression = expressionify({
 	operators: booleanOperators,
 	parseOperand: Number
@@ -95,7 +92,6 @@ result = evaluateExpression('(1 | 0) & !1');
 
 console.log(result);
 // false
-
 ```
 
 Another example is evaluating expression that contains variables:
@@ -121,3 +117,5 @@ values.z = true;
 console.log(evaluateExpression());
 // false
 ```
+
+For more examples with boolean, arithmetical and set expressions see [./test directory](./test).

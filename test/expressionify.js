@@ -68,15 +68,89 @@ var parseNumberOperand = function(operand) {
 };
 
 
+var setOperators = {
+	'union': {
+		execute: function(x, y) {
+			var result = [];
+			for (var i in x) {
+				result.push(x[i]);
+			}
+			for (var j in y) {
+				if (result.indexOf(y[j]) === -1) {
+					result.push(y[j]);
+				}
+			}
+			return result;
+		},
+		priority: 2,
+		type: 'binary'
+	},
+	'intersect': {
+		execute: function(x, y) {
+			var result = [];
+			for (var i in x) {
+				if (y.indexOf(x[i]) !== -1) {
+					result.push(x[i]);
+				}
+			}
+			return result;
+		},
+		priority: 1,
+		type: 'binary'
+	},
+	'diff': {
+		execute: function(x, y) {
+			var result = [];
+			for (var i in x) {
+				if (y.indexOf(x[i]) === -1) {
+					result.push(x[i]);
+				}
+			}
+			return result;
+		},
+		priority: 2,
+		type: 'binary'
+	}
+};
+
+var parseSetOperand = function(operand) {
+	return operand.replace('{', '').replace('}', '').split(',');
+};
+
+
 describe('expressionify', function() {
 
 	it('module exports function', function() {
 		expect(expressionify).a(Function);
 	});
 
-	it('modle exports Expression class', function() {
+	it('module exports Expression class', function() {
 		expect(expressionify.Expression).a(Function);
 	});
+
+	it('should throw `params.operators is missing` error',
+		function() {
+			expect(expressionify('1', {})).to.throwException(
+				function(err) {
+					expect(err.message).to.equal('params.operators is missing');
+				}
+			);
+		}
+	);
+
+	it('should throw `params.parseOperand is missing` error',
+		function() {
+			var evalExpression = expressionify('1', {
+				operators: arithmeticalOperators
+			});
+
+			expect(evalExpression).to.throwException(
+				function(err) {
+					expect(err.message).to.equal('params.parseOperand is missing');
+				}
+			);
+		}
+	);
 
 	// test boolean expressions
 	[{
@@ -119,7 +193,7 @@ describe('expressionify', function() {
 		expression: '!!1',
 		result: true
 	}].forEach(function(test) {
-		it('should return ' + test.result + ' for ' + test.expression,
+		it('should return ' + test.result + ' for "' + test.expression + '"',
 			function() {
 				var evalExpression = expressionify(test.expression, {
 					operators: booleanOperators,
@@ -151,7 +225,7 @@ describe('expressionify', function() {
 		expression: '(op1 | nop1) & (!op2 | !nop2)',
 		result: true
 	}].forEach(function(test) {
-		it('should return ' + test.result + ' for ' + test.expression,
+		it('should return ' + test.result + ' for "' + test.expression + '"',
 			function() {
 				var operands = ['op1', 'op2', 'op3'];
 
@@ -181,7 +255,7 @@ describe('expressionify', function() {
 		expression: 'x*(4 - 3*y)',
 		result: -10
 	}].forEach(function(test) {
-		it('should return ' + test.result + ' for ' + test.expression,
+		it('should return ' + test.result + ' for "' + test.expression + '"',
 			function() {
 				var values = {
 					x: 2,
@@ -223,7 +297,7 @@ describe('expressionify', function() {
 		expression: '1 / 0',
 		result: Infinity
 	}].forEach(function(test) {
-		it('should return ' + test.result + ' for ' + test.expression,
+		it('should return ' + test.result + ' for "' + test.expression + '"',
 			function() {
 				var evalExpression = expressionify(test.expression, {
 					operators: arithmeticalOperators,
@@ -242,7 +316,7 @@ describe('expressionify', function() {
 		expression: 'Infinity / Infinity',
 		result: 'NaN'
 	}].forEach(function(test) {
-		it('should return ' + test.result + ' for ' + test.expression,
+		it('should return ' + test.result + ' for "' + test.expression + '"',
 			function() {
 				var evalExpression = expressionify(test.expression, {
 					operators: arithmeticalOperators,
@@ -254,60 +328,35 @@ describe('expressionify', function() {
 		);
 	});
 
+	// test set expressions
+	[{
+		expression: '{1}',
+		result: ['1']
+	}, {
+		expression: '{1,2} union {1,3}',
+		result: ['1', '2', '3']
+	}, {
+		expression: '{1,2} intersect {1,3}',
+		result: ['1']
+	}, {
+		expression: '({1,2} intersect {1,3}) union {3,4}',
+		result: ['1','3','4']
+	}, {
+		expression: '{1,2} diff {1,2,3}',
+		result: []
+	}, {
+		expression: '{1,2} diff {1,3} intersect {1,2,3,4}',
+		result: ['2']
+	}].forEach(function(test) {
+		it('should return {' + test.result + '} for "' + test.expression + '"',
+			function() {
+				var evalExpression = expressionify(test.expression, {
+					operators: setOperators,
+					parseOperand: parseSetOperand
+				});
 
-	it('should throw `expression is missing` error cause expresion is `undefined`',
-		function() {
-			expect(expressionify(undefined, {
-				operators: arithmeticalOperators
-			})).to.throwException(function(err) {
-				expect(err.message).to.equal('expression is missing');
-			});
-		}
-	);
-
-	it('should throw `expression is missing` error cause expression is empty',
-		function() {
-			expect(expressionify('', {
-				operators: arithmeticalOperators
-			})).to.throwException(function(err) {
-				expect(err.message).to.equal('expression is missing');
-			});
-		}
-	);
-
-	it('should throw `expression is invalid` error',
-		function() {
-			expect(expressionify('invalid:~', {
-				operators: arithmeticalOperators
-			})).to.throwException(
-				function(err) {
-					expect(err.message).to.equal('expression is invalid');
-				}
-			);
-		}
-	);
-
-	it('should throw `params.operators is missing` error',
-		function() {
-			expect(expressionify('1', {})).to.throwException(
-				function(err) {
-					expect(err.message).to.equal('params.operators is missing');
-				}
-			);
-		}
-	);
-
-	it('should throw `params.parseOperand is missing` error',
-		function() {
-			var evalExpression = expressionify('1', {
-				operators: arithmeticalOperators
-			});
-
-			expect(evalExpression).to.throwException(
-				function(err) {
-					expect(err.message).to.equal('params.parseOperand is missing');
-				}
-			);
-		}
-	);
+				expect(evalExpression()).to.be.eql(test.result);
+			}
+		);
+	});
 });
