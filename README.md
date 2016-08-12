@@ -39,7 +39,7 @@ var booleanOperators = {
 
 Also you must pass `parseOperand` to evaluate methods. `parseOperand` will be
 used to get value of every operand. Operand is a sequence of non-whitespace
-characters that is not equals to any operator or bracket.
+characters that is not equal to any operator or bracket.
 
 **Note:** `parseOperand` must return value compatible with defined operators.
 
