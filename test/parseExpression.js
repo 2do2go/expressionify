@@ -126,4 +126,19 @@ describe('parseExpression', function() {
 		);
 	});
 
+	it('should escape all special symbols in operators',
+		function() {
+			var tokens = parseExpression(
+				'a || b && c',
+				{
+					operators: {
+						'||': { type: 'binary' },
+						'&&': { type: 'binary' }
+					}
+				}
+			);
+
+			expect(tokens).to.eql(['a', '||', 'b', '&&', 'c']);
+		}
+	);
 });
