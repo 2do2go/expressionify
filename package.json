@@ -1,7 +1,7 @@
 {
   "name": "expressionify",
   "description": "Simple node.js expression parser and evaluator using shunting-yard and reverse polish notation algorithms",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "author": "2do2go team <dev.2do2go@gmail.com>",
   "license": "MIT",
   "repository": {
